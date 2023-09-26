@@ -1,0 +1,10 @@
+[Unit]
+Description=Check uptime
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStart=/root/devops_course/homework2/add-uptime.sh
+
+[Install]
+WantedBy=shutdown.target
