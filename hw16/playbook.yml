@@ -1,0 +1,71 @@
+- name: Homework 16
+  hosts: test_servers
+  vars:
+    file_name: file_to_copy.txt
+    user_name: testuser
+  become: yes
+
+  tasks:
+    - name: Copy file
+      ansible.builtin.copy:
+        src: ./{{file_name}}
+        dest: ./{{file_name}}
+
+    - name: Delete file
+      ansible.builtin.file:
+        path: ./{{file_name}}
+        state: absent
+
+    - name: Create user '{{user_name}}'
+      ansible.builtin.user:
+        name: "{{user_name}}"
+        comment: Test User
+
+    - name: install dependencies
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+        -
+    - name: add GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: add docker repository to apt
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: install docker
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: check docker is active
+      service:
+          name: docker
+          state: started
+          enabled: yes
+
+    - name: Ensure group "docker" exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: adding testuser to docker group
+      user:
+        name: "{{user_name}}"
+        groups: docker
+        append: yes
