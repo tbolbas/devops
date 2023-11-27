@@ -1,0 +1,12 @@
+- name: install tomcat
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Wait for server to restart
+      reboot:
+        reboot_timeout: 3600
+
+    - name: install tomcat
+      import_role:
+        name: robertdebock.tomcat
